@@ -13,7 +13,7 @@ const habitEntrySchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: String,
+      type: Date,
       required: true,
     },
     completed: {
