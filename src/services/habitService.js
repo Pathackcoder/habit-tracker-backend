@@ -87,13 +87,14 @@ exports.toggleHabitEntry = async (userId, habitId, entryData) => {
     throw error;
   }
 
-  const entryDate = date ? new Date(date) : new Date();
+  const entryDate = date;
   entryDate.setHours(0, 0, 0, 0);
 
-  let entry = await HabitEntry.findOne({
-    habit: habitId,
-    date: entryDate,
-  });
+let entry = await HabitEntry.findOne({
+  habit: habitId,
+  user: userId,
+  date: entryDate,
+});
 
   if (entry) {
     entry.completed = completed !== undefined ? completed : entry.completed;
@@ -102,15 +103,14 @@ exports.toggleHabitEntry = async (userId, habitId, entryData) => {
     entry.completedAt = completed ? new Date() : null;
     await entry.save();
   } else {
-    entry = await HabitEntry.create({
-      habit: habitId,
-      user: userId,
-      date: entryDate,
-      completed: completed || false,
-      count: count || 0,
-      notes: notes || '',
-      completedAt: completed ? new Date() : null,
-    });
+      entry = await HabitEntry.create({
+        habit: habitId,
+        user: userId,
+        date: entryDate,
+        completed: completed ?? false,
+        count: count ?? 0,
+        notes: notes ?? '',
+      });
   }
 
   return entry;
@@ -131,9 +131,10 @@ exports.getHabitEntries = async (userId, habitId, options = {}) => {
 
   if (startDate || endDate) {
     query.date = {};
-    if (startDate) query.date.$gte = new Date(startDate);
-    if (endDate) query.date.$lte = new Date(endDate);
+    if (startDate) query.date.$gte = startDate.slice(0,10);
+    if (endDate) query.date.$lte = endDate.slice(0,10);
   }
+
 
   const entries = await HabitEntry.find(query).sort({ date: -1 });
   return entries;
