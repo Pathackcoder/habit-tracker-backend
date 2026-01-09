@@ -18,7 +18,7 @@ A RESTful API backend for a Habit Tracker application built with Node.js, Expres
 - **Database**: MongoDB with Mongoose
 - **Authentication**: JWT (JSON Web Tokens)
 - **Validation**: Express Validator
-- **Password Hashing**: bcryptjs
+
 
 ## Project Structure
 
