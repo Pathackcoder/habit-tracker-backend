@@ -33,6 +33,9 @@ if (process.env.NODE_ENV === 'development') {
 app.use(logger);
 
 // Routes
+app.get("/", (req, res)=>{
+  res.send("ye bhi thik hai ")
+})
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
