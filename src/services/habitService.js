@@ -87,8 +87,7 @@ exports.toggleHabitEntry = async (userId, habitId, entryData) => {
     throw error;
   }
 
-  const entryDate = date ? new Date(date) : new Date();
-  entryDate.setHours(0, 0, 0, 0);
+const entryDate = new Date(date + 'T00:00:00Z');
 
   let entry = await HabitEntry.findOne({
     habit: habitId,
@@ -119,7 +118,6 @@ exports.toggleHabitEntry = async (userId, habitId, entryData) => {
 exports.getHabitEntries = async (userId, habitId, options = {}) => {
   const { startDate, endDate } = options;
 
-  // Verify habit belongs to user
   const habit = await Habit.findOne({ _id: habitId, user: userId });
   if (!habit) {
     const error = new Error('Habit not found');
@@ -131,12 +129,22 @@ exports.getHabitEntries = async (userId, habitId, options = {}) => {
 
   if (startDate || endDate) {
     query.date = {};
-    if (startDate) query.date.$gte = new Date(startDate);
-    if (endDate) query.date.$lte = new Date(endDate);
+
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setUTCHours(0, 0, 0, 0);   // day start
+      query.date.$gte = start;
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setUTCHours(23, 59, 59, 999); // day end
+      query.date.$lte = end;
+    }
   }
 
-  const entries = await HabitEntry.find(query).sort({ date: -1 });
-  return entries;
+  return await HabitEntry.find(query).sort({ date: -1 });
 };
+
 
 
