@@ -12,17 +12,33 @@ validateEnv();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://stoic-habit-pi.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+const allowedOrigins = [
+  'https://stoic-habit.online',
+  'https://www.stoic-habit.online',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
 
-app.options("*", cors());
+app.options('*', cors());
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow server-to-server & tools like Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -33,9 +49,6 @@ if (process.env.NODE_ENV === 'development') {
 app.use(logger);
 
 // Routes
-app.get("/", (req, res)=>{
-  res.send("ye bhi thik hai ")
-})
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
