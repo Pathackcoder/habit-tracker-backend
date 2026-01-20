@@ -52,7 +52,7 @@ app.use(logger);
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'Server is running',
+    message: 'Server is running on port 5001',
     timestamp: new Date().toISOString(),
   });
 });
