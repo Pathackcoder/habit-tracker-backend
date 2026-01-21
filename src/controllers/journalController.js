@@ -57,3 +57,24 @@ exports.deleteJournal = async (req, res, next) => {
   }
 };
 
+exports.getJournalStats = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const stats = await journalService.getJournalStats(userId);
+    sendSuccess(res, stats);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getJournalCalendar = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { year, month } = req.query;
+    const data = await journalService.getJournalCalendar(userId, year, month);
+    sendSuccess(res, data);
+  } catch (err) {
+    next(err);
+  }
+};
+

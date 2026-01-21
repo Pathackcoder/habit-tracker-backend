@@ -77,3 +77,63 @@ exports.deleteJournal = async (userId, journalId) => {
 };
 
 
+exports.getJournalStats = async (userId) => {
+  const journals = await Journal.find({ user: userId }).sort({ date: 1 });
+
+  const totalEntries = journals.length;
+
+  // This month
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const thisMonth = journals.filter(j => j.date >= monthStart).length;
+
+  // Streak logic
+  let currentStreak = 0;
+  let bestStreak = 0;
+  let prevDate = null;
+
+  journals.forEach(j => {
+    if (!prevDate) {
+      currentStreak = 1;
+    } else {
+      const diff =
+        (j.date - prevDate) / (1000 * 60 * 60 * 24);
+
+      if (diff === 1) {
+        currentStreak++;
+      } else {
+        bestStreak = Math.max(bestStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+    prevDate = j.date;
+  });
+
+  bestStreak = Math.max(bestStreak, currentStreak);
+
+  return {
+    totalEntries,
+    currentStreak,
+    bestStreak,
+    thisMonth,
+  };
+};
+
+
+exports.getJournalCalendar = async (userId, year, month) => {
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0);
+
+  const journals = await Journal.find({
+    user: userId,
+    date: { $gte: start, $lte: end },
+  }).select('date');
+
+  return {
+    filledDates: journals.map(j =>
+      j.date.toISOString().split('T')[0]
+    ),
+  };
+};
+
